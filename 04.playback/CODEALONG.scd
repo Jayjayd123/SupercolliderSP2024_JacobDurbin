@@ -40,12 +40,12 @@
 
 //////// 10 ////////
 // lets record into a buffer
-// define a new buffer that is 3 seconds long
-~buffer=Buffer.alloc(s,s.sampleRate*3,2);
+// define a new buffer that is 3 seconds long - 3 seconds because were multiplying the sample rate by 3 which is 3 seconds
+~buffer=Buffer.alloc(s,s.sampleRate*3,2); // Done action 2
 // then define a function to record into that buffer
 (
 {
-	RecordBuf.ar(SoundIn.ar([0,1]), ~buffer, loop:0, doneAction:2)
+	RecordBuf.ar(SoundIn.ar([0])!2, ~buffer, loop:0, doneAction:2) // added an !2 to create stereo
 }.play; // .play will play this synth that records from the input audio
 )
 // lets see if it worked!
