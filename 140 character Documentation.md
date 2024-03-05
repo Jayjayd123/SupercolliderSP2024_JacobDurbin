@@ -1,0 +1,3 @@
+For my quick code assignment, I created a short sequence using the default instrument in supercollider. I started with a large, 700 character project that had a synth definition and a longer sequence, but then adjusted once I realized 140 characters is the MAX. 
+
+My code is very simple now and honestly just referenced my personal class notes to create it. I feel like I struggled with understanding the possibilities because there is definetly more I can do here, I just don't know what's available to the fullest extent. I had fun though!
