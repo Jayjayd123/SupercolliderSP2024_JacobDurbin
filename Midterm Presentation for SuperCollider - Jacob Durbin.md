@@ -8,7 +8,7 @@ For my presentation I studied the work "Chemical" by Artist "Qirky" or Ryan Kirk
 
 Ryan has performed at many Algorave events and is developing a coding environment called FoxDot.
 
-I learned all of this info through his github page as well as various youtube videos. At the time of writting this documentation file, I've left a comment on a few vids and I'm awaiting a reply. If I hear anything, I'll update this file!
+I learned all of this info through his github page as well as various youtube videos. At the time of writting this documentation file, I've left a comment on a few vids and I'm awaiting a reply. If I hear anything, I'll update this file! *update, he did not reply :(*
 
 I really enjoyed this piece and it was fairly easy to analyze because it had so many cool things to offer! One particular thing about the piece I really enjoyed was the panning. The use of panning between all the many instruments was very tactile to the ears and pleasent to listen to!
 
