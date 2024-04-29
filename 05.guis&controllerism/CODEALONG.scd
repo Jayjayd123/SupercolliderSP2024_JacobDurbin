@@ -247,7 +247,7 @@ e = SynthDef(\engine, {
 	OffsetOut.ar(12, e1a * wguideFeedback + (parabola - OnePole.ar(parabola, exp(-2pi * (30 * SampleDur.ir)))));
 
 	spacewarp = e1b + e2b + e2a + e1a;
-	spacewarp = spacewarp - OnePole.ar(spacewarp, exp(-2pi * (222 * SampleDur.ir)));
+	spacewarp = spacewarp - OnePole.ar(spacewarp, exp(-2pi * (200 * SampleDur.ir)));
 	spacewarp = spacewarp - OnePole.ar(spacewarp, exp(-2pi * (200 * SampleDur.ir)));
 
 	engine = (spacewarp + fourstroke)!2 * 0.5;

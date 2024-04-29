@@ -1,23 +1,21 @@
-/* PLAYBACK */
+// adapted from https://github.com/schollz/workshops
 
-//////// 8 ////////
+// don't forget to BOOT!
+
+//////// a ////////
 // to play samples we first need to load a sample into a "buffer" using a file or recording
 
 // ~someBuffer=Buffer.read(s,<filename>) will read the file into the buffer ~someBuffer
 // on server "s"
 ~buffer=Buffer.read(s,thisProcess.nowExecutingPath.dirname++"/kalimba.wav");
 
+// play the buffer
+~buffer.play;
 // plot the buffer
 ~buffer.plot;
 
-// play the buffer
-~buffer.play;
 
-
-//PlayBuf is a UGen
-
-
-//////// 9 ////////
+//////// b ////////
 // lets play the buffer using the PlayBuf "UGen"
 
 (
@@ -26,48 +24,40 @@
 	snd=PlayBuf.ar( // PlayBuf will play a sound in a buffer
 		numChannels:2, // we are dealing with stereo samples, so 2 channels
 		bufnum:~buffer, // the buffer
-		rate: -1,
-		loop: 1, // 1 is true 0 is false
+		/* mess with // rate: -0.5, */
+		loop:1,
 	);
 	Out.ar(0,snd); // send to Out UGen to channel 0 (default speakers)
 }.play; // .play will play the sound immediately!
 )
 
-// done actions are either 0 or 2 usually. 0 is on the "Out.ar(0, snd);
 
-
-
-
-//////// 10 ////////
+//////// c ////////
 // lets record into a buffer
-// define a new buffer that is 3 seconds long - 3 seconds because were multiplying the sample rate by 3 which is 3 seconds
-~buffer=Buffer.alloc(s,s.sampleRate*3,2); // Done action 2
+// define a new buffer that is 3 seconds long
+~buffer=Buffer.alloc(s,s.sampleRate*3,2);
 // then define a function to record into that buffer
 (
 {
-	RecordBuf.ar(SoundIn.ar([0])!2, ~buffer, loop:0, doneAction:2) // added an !2 to create stereo
+	RecordBuf.ar(SoundIn.ar([0])!2, ~buffer, loop:0, doneAction:2)
 }.play; // .play will play this synth that records from the input audio
 )
 // lets see if it worked!
-~buffer.plot;
 ~buffer.play;
-
+~buffer.plot;
 // TRY! try recording and plotting/playing your recording
 
 
 
-
-
-//////// 11 ////////
+//////// d ////////
 // lets define how our sample will playback
 // first we will define what is called a "SynthDef", a synth definition
 // SynthDef(<name>,<function>).add
 (
 SynthDef("musicbox", {
 	// buffers have an index, and the buffer index will be supplied later using
-	// an argument, "arg":
+
 	arg bufnum = 0;
-	// after arguments, we will declare variables that we will use with "var":
 	var snd;
 
 	snd=PlayBuf.ar(
@@ -82,56 +72,20 @@ SynthDef("musicbox", {
 )
 
 
-
-
-
-//////// 12  ////////
+//////// e  ////////
 // now let's play our defined synth using the "Synth" function
 // we can then create a synth that plays the sound!
 ~syn=Synth("musicbox",[\bufnum,~buffer]);
 ~syn.free; // will stop playing
 
 
-
-//////// 13 ////////
-// aside: lets learn some modulation to mangle the musicbox
-// you can use many different Ugens for modulation!
-(
-{
-	[LorenzL.ar(5000), LFTri.ar(100), LFNoise0.kr(100),LFNoise1.kr(100),LFNoise2.kr(100)]
-}.plot(0.1)
-)
-
-// modulation ranges from -1 to 1, but you can set any range you want with `.range`
-// btw, you can notice a difference between .ar and .kr at this fast speed (100 hz)
-// .ar is needed if you are in audio rate (>~30 hz)
-(
-{	[SinOsc.ar(100).range(3,4),SinOsc.kr(100).range(3,4),Saw.ar(100).range(5,6),Saw.kr(100).range(5,6)]
-}.plot(0.1)
-)
-
-// TRY! try making some different modulation and plotting it
-// you can use <Ctrl>+D to search for modulation
-// and you can add / multiply to your hearts content
-// for example:
-(
-{
-	SinOscFB.kr(30,LFNoise0.kr(300)) + WhiteNoise.ar(0.1)
-}.plot(0.5);
-)
-
-
-
-
-
-//////// 14 ////////
-// note lets create a synthdef with some modulation
+//////// f ////////
+// now lets create a synthdef with some modulation
 (
 SynthDef("musicbox", {
-	// buffers have an index, and the buffer index will be supplied later using
-	// an argument, "arg":
+
 	arg bufnum = 0;
-	// after arguments, we will declare variables that we will use with "var":
+
 	var snd;
 	var rate;
 
@@ -153,7 +107,7 @@ SynthDef("musicbox", {
 }).add; // .add will add it to our server to be used anytime we want!
 )
 
-~buffer=Buffer.read(s,thisProcess.nowExecutingPath.dirname++"/kalimba.wav");
+~buffer=Buffer.read(s,thisProcess.nowExecutingPath.dirname++"/whale.wav");
 
 x=Synth("musicbox", [\bufnum, ~buffer]); // will start playing
 
@@ -161,119 +115,49 @@ x=Synth("musicbox", [\bufnum, ~buffer]); // will start playing
 
 
 
-
-
-//////// 15 ////////
+//////// g ////////
 // lets modify our synth with some EFFECTS!
 // there are many effects
 // filters: RLPF, LPF, HPF, BPF
 // delays: CombC, DelayC
 // distortion: .tanh, .softclip, .distort
-/
+(
+SynthDef("musicbox", {
+	// buffers have an index, and the buffer index will be supplied later using
+	// an argument, "arg":
+	arg bufnum = 0;
+	// after arguments, we will declare variables that we will use with "var":
+	var snd;
 
-~buffer=Buffer.read(s,thisProcess.nowExecutingPath.dirname++"/kalimba.wav");
+	snd=PlayBuf.ar(
+		numChannels:2,
+		bufnum:bufnum,
+		loop: 1,                     // loop forever
+		rate:BufRateScale.kr(bufnum) // BufRateScale will calculate the
+	);                               // difference between the server sampling
+
+	snd = Pan2.ar(snd,LFNoise2.kr(1)); // pans randomly left and right
+
+	snd = RLPF.ar(snd, MouseX.kr(10,20000,1),0.5); // effects controlled by mouse!
+
+	snd = CombC.ar(snd,0.5,MouseY.kr(0.05,0.5)); // add delay
+
+	snd = (snd * SinOsc.kr(0.1).range(1,10)).tanh * 0.1; // add distortion
+
+	Out.ar(0,snd);
+}).add; // .add will add it to our server to be used anytime we want!
+)
+
+~buffer=Buffer.read(s,thisProcess.nowExecutingPath.dirname++"/whale.wav");
 
 x=Synth("musicbox", [\bufnum, ~buffer]); // will start playing
 
 // TRY! change up the effects, the filters, the distortion, the modulation
 
+s.record(numChannels:8);
+s.stopRecording;
 
-
-
-
-//////// 16 ////////
-// PlayBuf is missing an important feature sometimes needed:
-// it is designed to always play to the end of a buffer.
-// there are multiple ways around this, but to generally get
-// more control over playback/recording position we can use
-// the "Phasor" Ugen
-// here is a little looper using a Phasor for recording and
-// two Phasors for reading (two-head playback)
-(
-SynthDef("recorder",{ arg rate=1,bufnum=0;
-	var in;
-	var phase;
-	// setup phase, which sample of the buffer to play
-	phase = Phasor.ar(0, BufRateScale.kr(bufnum) * rate, 0, BufFrames.kr(bufnum));
-	// collect input from microphone
-	in=SoundIn.ar([0,1]);
-	// write the input to the buffer, at the phase location
-	BufWr.ar(in, bufnum, phase,loop:0);
-	// free after specified time
-	FreeSelf.kr(TDelay.kr(Trig.kr(1),BufDur.kr(bufnum)));
-	// disable output to resist feedback
-	Out.ar(0,in*0); // could also use Silent.ar()
-}).add;
-
-// define a player to do the playback (with crossfades!) using
-// two headed playback
-SynthDef("player",{ arg rate=1,bufnum=0,fadeOut=0.0;
-	var snd;
-	var phase1,phase2;
-	// define play duration to the duration, minus the fadeout
-	var playDur = BufDur.kr(bufnum)-fadeOut;
-	// trigger the start every play duration
-	var trig1 = Impulse.kr(1/(playDur/rate));
-	// trigger a toggle to switch between two-headed playback
-	var aOn = ToggleFF.kr(trig1);
-	// define total frames
-	var totalFrames = BufFrames.kr(bufnum);
-
-	// define rate
-	rate = BufRateScale.kr(bufnum) * rate;
-
-	// setup phasors for two-head reader
-	// phasors have a start AND end position
-	phase1=Phasor.ar(trig:aOn, rate:rate, start:0, end:totalFrames);
-	phase2=Phasor.ar(trig:1-aOn, rate:rate, start:0, end:totalFrames);
-
-	// remove clips using fadeout/fadein (buffer must be total time + fade out)
-	snd = Lag.kr(aOn,fadeOut*0.9)*BufRd.ar(2,bufnum,phase1);
-	snd = snd+(Lag.kr(1-aOn,fadeOut*0.9)*BufRd.ar(2, bufnum, phase2));
-
-	// effects
-	snd=LPF.ar(snd,MouseX.kr(20,20000,1));
-	Out.ar(0,snd*Line.ar());
-}).add;
-)
-
-// lets define a codeblock to initialize some synths and buffers
-(
-var fadeOut=0.1; // cross-fade time
-var syns=List.new(); // synths we will make
-var bufs=List.new(); // buffers we will make
-var loopTimes=[1,2,3,4,5,6]; // in seconds
-loopTimes.do({ arg v,i;
-	Buffer.alloc(s,(s.sampleRate*(v+fadeOut)).postln,2,{
-		// this function runs once the buffer is allocated
-		arg b;
-		// create a new buffer
-		bufs.add(b);
-		// create a new synth with this buffer
-		syns.add(Synth("player",[\bufnum,b,\fadeOut,fadeOut]));
-	});
-});
-// define a function to do the recording
-r= {arg i; Synth("recorder",[\bufnum,bufs[i]])};
-)
-
-// .. and record one at a time
-r.(0); // record into first loop (0-index)
-r.(1); // record into second loop
-r.(2); // ..
-r.(3); // ..
-r.(4); // ..
-r.(5); // ..
-r.(6); // ..
-
-// TRY it! try changing to different loop times
-// or try adding effects modulation to the "player" SynthDef
-
-
-
-
-
-//////// 17 ////////
+////////////////
 // __   __  _______  _______
 // |  | |  ||  _    ||       |
 // |  | |  || |_|   ||    ___|
@@ -282,7 +166,7 @@ r.(6); // ..
 // |       || |_|   ||   |___
 // |_______||_______||_______|
 //
-// ube is a little tool I made to play with all these ideas:
+// ube is a little tool made to play with all these ideas:
 // it is a "macrogranulator" that modulates all sorts of things of buffers
 // and does recording/playback with the buffers
 //
@@ -447,7 +331,7 @@ s.waitForBoot({
 
 	Routine {
 		// either load a file into the tape
-		u.loadTape(tape:1,filename:thisProcess.nowExecutingPath.dirname++"/kalimba.wav");
+		u.loadTape(tape:1,filename:thisProcess.nowExecutingPath.dirname++"/wineglass.wav");
 		// OR record another tape and play it
 		// u.recordTape(tape:1,seconds:3,recLevel:2); 3.5.wait;
 
